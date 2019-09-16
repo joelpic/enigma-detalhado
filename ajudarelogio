@@ -376,19 +376,19 @@ void display7_4511()
     break;
 
     case 2:
-               display7_4511_Out(minuto/10); // Divisão por 10 -> Dezena dos minutos
+               display7_4511_Out(minutos/10); // Divisão por 10 -> Dezena dos minutos
                display7_4511_dip2 = 1;             //Liga o display 2
                _pos_display7_4511 = 3;            //Habilitar display 3
     break;
 
     case 3:
-               display7_4511_Out(hora%10); // Resto da divisão por 10 -> Unidade das horas
+               display7_4511_Out(horas%10); // Resto da divisão por 10 -> Unidade das horas
                display7_4511_dip3 = 1;             //Liga o display 3
                _pos_display7_4511 = 4;            //Habilitar display 4
     break;
 
     case 4:
-               display7_4511_Out(hora/10); // Divisão por 10 -> Dezena das horas
+               display7_4511_Out(horas/10); // Divisão por 10 -> Dezena das horas
                display7_4511_dip4 = 1;             //Liga o display 4
                _pos_display7_4511 = 5;            //Habilitar display 5
     break;
