@@ -1,0 +1,404 @@
+#include<display9digitos.h>
+
+#define c7 Button(&PORTC, 7, 1, 0)
+#define trisc7 TRISC7_bit
+int horas, minutos, segundos;
+
+
+ sbit display7_A at RB4_bit;
+ sbit diSplay7_4511_B at RB5_bit;
+ sbit display7_4511_C at RB6_bit;
+ sbit display7_4511_D at RB7_bit;
+ sbit diSplay7_4511_E at RB1_bit;
+ sbit display7_4511_F at RB2_bit;
+ sbit display7_4511_G at RB3_bit;
+ sbit display7_4511_dip1 at RA0_bit;
+ sbit diSplay7_4511_dip2 at RA1_bit;
+ sbit display7_4511_dip3 at RA2_bit;
+ sbit display7_4511_dip4 at RA3_bit;
+ sbit display7_4511_dip5 at RA6_bit;
+
+
+ sbit display7_4511_A_Direction at TRISB4_bit;
+ sbit display7_4511_B_Direction at TRISB5_bit;
+ sbit display7_4511_C_Direction at TRISB6_bit;
+ sbit display7_4511_D_Direction at TRISB7_bit;
+ sbit display7_4511_E_Direction at TRISB1_bit;
+ sbit display7_4511_F_Direction at TRISB2_bit;
+ sbit display7_4511_G_Direction at TRISB3_bit;
+ sbit display7_4511_dip1_Direction at TRISA0_bit;
+ sbit display7_4511_dip2_Direction at TRISA1_bit;
+ sbit display7_4511_dip3_Direction at TRISA2_bit;
+ sbit display7_4511_dip4_Direction at TRISA3_bit;
+ sbit display7_4511_dip5_Direction at TRISA6_bit;
+ //---------------------------
+  //VARIAVEIS GLOBAIS
+  unsigned long conter = 12000,a,valorad, tensaoad;
+  int count;
+    char txt [8];
+//------------------------------------------------------------------------------
+// funcoes secundarias
+//por enquanto nao tem ainda
+
+
+void InitTimer0()
+{
+  OPTION_REG      = 0x83;
+  TMR0            = 6;
+  INTCON          = 0xA0;
+}
+
+void Interrupt()
+{
+  if (TMR0IF_bit)
+  {
+       display7_4511(segundos);
+    TMR0IF_bit    = 0;
+    TMR0          = 6;
+  }
+}
+//------------------------------------------------------------------------------
+
+
+void main()
+{
+
+bit oldstate, oldstate1;
+int i=500;
+
+
+
+
+
+   display7_4511_Init();
+ InitTimer0();
+ trisb=0x00;
+ portb=0x00;
+
+ TRISA=0X00;
+ PORTA=0X00;
+
+ trisc=0x00;
+ portc=0x00;
+
+ ANSEL=0;
+ ANSELH=0;
+ 
+
+
+
+// I2C*********************************
+
+ I2C1_Init(100000);//inicia I2C com frequencia em 1000k
+
+//**********ESCRITA I2C*********************************************
+  I2C1_Start();
+ I2C1_Wr(11010000);
+ I2C1_Wr(0x02); //ESCRITA HORA
+ I2C1_Wr(Dec2Bcd(23));
+ I2C1_Stop();
+
+   I2C1_Start();
+ I2C1_Wr(11010000);
+ I2C1_Wr(0x01); //ESCRITA MINUTOS
+ I2C1_Wr(Dec2Bcd(29));
+ I2C1_Stop();
+
+
+
+ while(1)
+ {  
+
+ //********leitura horas**********************************
+ I2C1_Start();
+ I2C1_Wr(11010000);
+ I2C1_Wr(0x02);
+ I2C1_Repeated_Start();
+ I2C1_Wr(11010001);
+ horas= Bcd2Dec (I2C1_Rd(0));
+ I2C1_Stop();
+//*********leitura minutos********************************
+ I2C1_Start();
+ I2C1_Wr(11010000);
+ I2C1_Wr(0x01);
+ I2C1_Repeated_Start();
+ I2C1_Wr(11010001);
+ minutos= Bcd2Dec (I2C1_Rd(0));
+ I2C1_Stop();
+//*********leitura segundos********************************
+ I2C1_Start();
+ I2C1_Wr(11010000);
+ I2C1_Wr(0x00);
+ I2C1_Repeated_Start();
+ I2C1_Wr(11010001);
+ segundos= Bcd2Dec (I2C1_Rd(0));
+ I2C1_Stop();
+//*********************************************************
+
+delay_ms(10);
+
+ }
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+//biblioteca para os displays 
+
+
+extern sfr sbit display7_A;
+extern sfr sbit display7_4511_B;
+extern sfr sbit display7_4511_C;
+extern sfr sbit display7_4511_D;
+extern sfr sbit display7_4511_E;
+extern sfr sbit display7_4511_F;
+extern sfr sbit display7_4511_G;
+
+
+
+extern sfr sbit display7_4511_dip1;
+extern sfr sbit display7_4511_dip2;
+extern sfr sbit display7_4511_dip3;
+extern sfr sbit display7_4511_dip4;
+extern sfr sbit display7_4511_dip5;
+
+
+
+//Pinos para Configuração do TRIS
+extern sfr sbit display7_4511_A_Direction;
+extern sfr sbit display7_4511_B_Direction;
+extern sfr sbit display7_4511_C_Direction;
+extern sfr sbit display7_4511_D_Direction;
+extern sfr sbit display7_4511_E_Direction;
+extern sfr sbit display7_4511_F_Direction;
+extern sfr sbit display7_4511_G_Direction;
+
+
+extern sfr sbit display7_4511_dip1_Direction;
+extern sfr sbit display7_4511_dip2_Direction;
+extern sfr sbit display7_4511_dip3_Direction;
+extern sfr sbit display7_4511_dip4_Direction;
+extern sfr sbit display7_4511_dip5_Direction;
+extern sfr sbit display7_4511_dip6_Direction;//traço
+
+
+//                         Descrição das funções
+//------------------------------------------------------------------------------
+/*
+
+********************************************************************************
+display7_4511_Init()
+Função para Inicialização dos displays de 7 segmentos obrigatoria
+
+********************************************************************************
+display7_4511_Out(unsigned char _num_display7_4511)
+Função para converter um número decima em BCD para 4511 em um unico display
+de 7 segmentos precisar da função display7_4511_Init()
+
+********************************************************************************
+display7_4511(unsigned int _num_display7_4511_4digito)
+Função para escreve um número em 4 display com C.I 4511 precisar da função
+display7_4511_Init()
+
+********************************************************************************
+*/
+//------------------------------------------------------------------------------
+void display7_4511_Init()
+{
+  display7_4511_A_Direction = 0;
+  display7_4511_B_Direction = 0;
+  display7_4511_C_Direction = 0;
+  display7_4511_D_Direction = 0;
+  display7_4511_E_Direction = 0;
+  display7_4511_F_Direction = 0;
+  display7_4511_G_Direction = 0;
+
+ // display7_4511_traco_Direction = 0;//traco
+
+
+  display7_4511_dip1_Direction = 0;
+  display7_4511_dip2_Direction = 0;
+  display7_4511_dip3_Direction = 0;
+  display7_4511_dip4_Direction = 0;
+  display7_4511_dip5_Direction = 0;
+  //display7_4511_dip6_Direction = 0;//traco
+
+  display7_A = 1;
+  display7_4511_B = 1;
+  display7_4511_C = 1;
+  display7_4511_D = 1;
+  display7_4511_E = 1;
+  display7_4511_F = 1;
+  display7_4511_G = 1;
+ // display7_4511_traco = 1;//traço
+  //display7_4511_dp = 1;
+
+  display7_4511_dip1 = 0;
+  display7_4511_dip2 = 0;
+  display7_4511_dip3 = 0;
+  display7_4511_dip4 = 0;
+  display7_4511_dip5 = 0;
+ // display7_4511_dip6 = 0;//traço
+
+}//Final display7_4511_Init
+
+//------------------------------------------------------------------------------
+void display7_4511_Out(unsigned char _num_display7_4511)
+{
+ switch (_num_display7_4511)
+ {
+    case 0:
+         display7_A = 1;
+         display7_4511_B = 1;
+         display7_4511_C = 1;
+         display7_4511_D = 1;
+         display7_4511_E = 1;
+         display7_4511_F = 1;
+         display7_4511_G = 0;
+  break;
+  case 1:
+         display7_A = 0;
+         display7_4511_B = 1;
+         display7_4511_C = 1;
+         display7_4511_D = 0;
+         display7_4511_E = 0;
+         display7_4511_F = 0;
+         display7_4511_G = 0;
+  break;
+  case 2:
+         display7_A = 1;
+         display7_4511_B = 1;
+         display7_4511_C = 0;
+         display7_4511_D = 1;
+         display7_4511_E = 1;
+         display7_4511_F = 0;
+         display7_4511_G = 1;
+  break;
+  case 3:
+         display7_A = 1;
+         display7_4511_B = 1;
+         display7_4511_C = 1;
+         display7_4511_D = 1;
+         display7_4511_E = 0;
+         display7_4511_F = 0;
+         display7_4511_G = 1;
+  break;
+  case 4:
+         display7_A = 0;
+         display7_4511_B = 1;
+         display7_4511_C = 1;
+         display7_4511_D = 0;
+         display7_4511_E = 0;
+         display7_4511_F = 1;
+         display7_4511_G = 1;
+  break;
+  case 5:
+         display7_A = 1;
+         display7_4511_B = 0;
+         display7_4511_C = 1;
+         display7_4511_D = 1;
+         display7_4511_E = 0;
+         display7_4511_F = 1;
+         display7_4511_G = 1;
+  break;
+  case 6:
+         display7_A = 0;
+         display7_4511_B = 0;
+         display7_4511_C = 1;
+         display7_4511_D = 1;
+         display7_4511_E = 1;
+         display7_4511_F = 1;
+         display7_4511_G = 1;
+  break;
+  case 7:
+         display7_A = 1;
+         display7_4511_B = 1;
+         display7_4511_C = 1;
+         display7_4511_D = 0;
+         display7_4511_E = 0;
+         display7_4511_F = 0;
+         display7_4511_G = 0;
+  break;
+  case 8:
+         display7_A = 1;
+         display7_4511_B = 1;
+         display7_4511_C = 1;
+         display7_4511_D = 1;
+         display7_4511_E = 1;
+         display7_4511_F = 1;
+         display7_4511_G = 1;
+  break;
+  case 9:
+         display7_A = 1;
+         display7_4511_B = 1;
+         display7_4511_C = 1;
+         display7_4511_D = 0;
+         display7_4511_E = 0;
+         display7_4511_F = 1;
+         display7_4511_G = 1;
+  break;
+ }//final switch
+}//final display7_4511_Num
+
+//------------------------------------------------------------------------------
+void display7_4511(unsigned long _num_display7_4511_5digito)
+{
+
+   static unsigned char _pos_display7_4511 = 1;
+
+
+   if (_num_display7_4511_5digito > 99999) _num_display7_4511_5digito = 99999;
+
+   display7_4511_dip1 = 0;
+   display7_4511_dip2 = 0;
+   display7_4511_dip3 = 0;
+   display7_4511_dip4 = 0;
+   display7_4511_dip5 = 0;
+
+   delay_us(10);
+
+   switch(_pos_display7_4511)
+   {
+    case 1:
+               display7_4511_Out((_num_display7_4511_5digito/10000)); //Escreve o n° no display
+               display7_4511_dip1 = 1;             //Liga o display 1
+               _pos_display7_4511 = 2;             //Habilitar display 2
+    break;
+
+    case 2:
+               display7_4511_Out(((_num_display7_4511_5digito/1000)%10)); //Escreve o n° no display
+               display7_4511_dip2 = 1;             //Liga o display 2
+               _pos_display7_4511 = 3;            //Habilitar display 3
+    break;
+
+    case 3:
+               display7_4511_Out(((_num_display7_4511_5digito/100)%10)); //Escreve o n° no display
+               display7_4511_dip3 = 1;             //Liga o display 3
+               _pos_display7_4511 = 4;            //Habilitar display 4
+    break;
+
+    case 4:
+               display7_4511_Out(((_num_display7_4511_5digito/10)%10)); //Escreve o n° no display
+               display7_4511_dip4 = 1;             //Liga o display 4
+               _pos_display7_4511 = 5;            //Habilitar display 5
+    break;
+
+    case 5:
+                display7_4511_Out((_num_display7_4511_5digito%10)); //Escreve o n° no display
+               display7_4511_dip5 = 1;             //Liga o display 5
+               _pos_display7_4511 = 1;            //Habilitar display 1
+    break;
+
+
+
+   }//Final do switch
+}//Final do display7_4511
