@@ -52,7 +52,7 @@ void Interrupt()
 {
   if (TMR0IF_bit)
   {
-       display7_4511(segundos);
+       display7_4511();
     TMR0IF_bit    = 0;
     TMR0          = 6;
   }
@@ -350,13 +350,14 @@ void display7_4511_Out(unsigned char _num_display7_4511)
 }//final display7_4511_Num
 
 //------------------------------------------------------------------------------
-void display7_4511(unsigned long _num_display7_4511_5digito)
+//void display7_4511(unsigned long _num_display7_4511_5digito)
+void display7_4511()
 {
 
    static unsigned char _pos_display7_4511 = 1;
 
 
-   if (_num_display7_4511_5digito > 99999) _num_display7_4511_5digito = 99999;
+   //if (_num_display7_4511_5digito > 99999) _num_display7_4511_5digito = 99999;
 
    display7_4511_dip1 = 0;
    display7_4511_dip2 = 0;
@@ -369,31 +370,31 @@ void display7_4511(unsigned long _num_display7_4511_5digito)
    switch(_pos_display7_4511)
    {
     case 1:
-               display7_4511_Out((_num_display7_4511_5digito/10000)); //Escreve o n° no display
+               display7_4511_Out(minutos%10); // Resto da divisão por 10 -> Unidade dos munitos
                display7_4511_dip1 = 1;             //Liga o display 1
                _pos_display7_4511 = 2;             //Habilitar display 2
     break;
 
     case 2:
-               display7_4511_Out(((_num_display7_4511_5digito/1000)%10)); //Escreve o n° no display
+               display7_4511_Out(minuto/10); // Divisão por 10 -> Dezena dos minutos
                display7_4511_dip2 = 1;             //Liga o display 2
                _pos_display7_4511 = 3;            //Habilitar display 3
     break;
 
     case 3:
-               display7_4511_Out(((_num_display7_4511_5digito/100)%10)); //Escreve o n° no display
+               display7_4511_Out(hora%10); // Resto da divisão por 10 -> Unidade das horas
                display7_4511_dip3 = 1;             //Liga o display 3
                _pos_display7_4511 = 4;            //Habilitar display 4
     break;
 
     case 4:
-               display7_4511_Out(((_num_display7_4511_5digito/10)%10)); //Escreve o n° no display
+               display7_4511_Out(hora/10); // Divisão por 10 -> Dezena das horas
                display7_4511_dip4 = 1;             //Liga o display 4
                _pos_display7_4511 = 5;            //Habilitar display 5
     break;
 
     case 5:
-                display7_4511_Out((_num_display7_4511_5digito%10)); //Escreve o n° no display
+                display7_4511_Out(0); //Escreve o n° no display
                display7_4511_dip5 = 1;             //Liga o display 5
                _pos_display7_4511 = 1;            //Habilitar display 1
     break;
